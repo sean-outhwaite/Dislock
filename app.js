@@ -61,6 +61,28 @@ app.post(
         })
       }
 
+      if (name === 'dislock') {
+        // Send a message into the channel where command was triggered from
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            flags: 32768,
+            components: [
+              {
+                type: 1, // ComponentType.ACTION_ROW
+                components: [
+                  {
+                    type: 5, // ComponentType.USER_SELECT
+                    custom_id: 'user_select',
+                    placeholder: 'Select a user',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      }
+
       // "challenge" command
       if (name === 'challenge' && id) {
         // Interaction context
