@@ -224,6 +224,26 @@ app.post(
             console.error('Error sending message:', err)
           }
         }
+      } else if (componentId === 'user_select') {
+        // const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+
+        try {
+          // Send results
+          await res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+              components: [
+                {
+                  type: MessageComponentTypes.TEXT_DISPLAY,
+                  content: 'Infraction logged.',
+                },
+              ],
+            },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
       }
       return
     }
