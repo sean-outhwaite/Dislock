@@ -237,31 +237,46 @@ app.post(
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
           })
 
-          const testRow = [
+          const getUser = async () => {
+            const user = await DiscordRequest(
+              `users/${req.body.member.user.id}`,
+              {
+                method: 'GET',
+              }
+            )
+            return user.json()
+          }
+          const user = await getUser()
+
+          const row = [
             [
-              '16/12/2025'.trim(),
-              'swan'.trim(),
-              '13:13'.trim(),
-              '13:18'.trim(),
-              '13:20'.trim(),
-              '2 mins'.trim(),
-              'Spamming emojis'.trim(),
+              `${new Date().toDateString()}`,
+              `${user.global_name || user.username}`,
+              `${new Date().toLocaleTimeString('en-NZ', {
+                timeZone: 'Pacific/Auckland',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+              })}`,
+              '13:18',
+              '13:20',
+              '2 mins',
+              'Spamming emojis',
             ],
           ]
 
           const body = {
-            values: testRow,
+            values: row,
           }
 
           try {
-            const result = await sheets.spreadsheets.values.append({
+            await sheets.spreadsheets.values.append({
               auth,
               spreadsheetId,
               range: 'Tardiness',
               requestBody: body,
-              valueInputOption: 'RAW',
+              valueInputOption: 'USER_ENTERED',
             })
-            console.log(result)
           } catch (err) {
             console.error('Error appending to sheet:', err)
           }
