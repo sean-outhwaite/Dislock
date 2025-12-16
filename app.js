@@ -30,6 +30,8 @@ app.post(
     // Interaction id, type and data
     const { id, type, data } = req.body
 
+    console.log(req.body)
+
     /**
      * Handle verification requests
      */
@@ -65,19 +67,34 @@ app.post(
       if (name === 'dislock') {
         // Send a message into the channel where command was triggered from
         return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          type: InteractionResponseType.MODAL,
           data: {
-            flags: 32768,
+            custom_id: 'dislock_modal',
+            title: 'Dislock Infraction',
             components: [
               {
-                type: 1, // ComponentType.ACTION_ROW
-                components: [
-                  {
-                    type: 5, // ComponentType.USER_SELECT
-                    custom_id: 'user_select',
-                    placeholder: 'Select a user',
-                  },
-                ],
+                type: 18, // ComponentType.LABEL
+                label: 'Whomst',
+                description: 'Select the naughty boy',
+                component: {
+                  type: 5, // ComponentType.USER_SELECT
+                  custom_id: 'user_select',
+                  placeholder: 'Select a user',
+                },
+              },
+              {
+                type: 18, // ComponentType.LABEL
+                label: 'Claimed Arrival Time',
+                description: '24H format plz',
+                component: {
+                  type: 4, // ComponentType.TEXT_INPUT
+                  custom_id: 'arrival_time',
+                  style: 2,
+                  min_length: 5,
+                  max_length: 5,
+                  placeholder: `22:13`,
+                  required: true,
+                },
               },
             ],
           },
