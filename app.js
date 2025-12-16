@@ -10,6 +10,7 @@ import {
 } from 'discord-interactions'
 import { getRandomEmoji, DiscordRequest } from './utils.js'
 import { getShuffledOptions, getResult } from './game.js'
+import { google } from 'googleapis'
 
 // Create an express app
 const app = express()
@@ -229,6 +230,42 @@ app.post(
 
         try {
           // Send results
+          const sheets = google.sheets('v4')
+          const spreadsheetId = process.env.SPREADSHEET_ID
+          const auth = new google.auth.GoogleAuth({
+            keyFile: 'secret-key.json',
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+          })
+
+          const testRow = [
+            [
+              '16/12/2025'.trim(),
+              'swan'.trim(),
+              '13:13'.trim(),
+              '13:18'.trim(),
+              '13:20'.trim(),
+              '2 mins'.trim(),
+              'Spamming emojis'.trim(),
+            ],
+          ]
+
+          const body = {
+            values: testRow,
+          }
+
+          try {
+            const result = await sheets.spreadsheets.values.append({
+              auth,
+              spreadsheetId,
+              range: 'Tardiness',
+              requestBody: body,
+              valueInputOption: 'RAW',
+            })
+            console.log(result)
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+
           await res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
