@@ -62,7 +62,7 @@ app.post(
       }
 
       if (name === 'dislock') {
-        // Send a message into the channel where command was triggered from)
+        // Trigger a modal to collect info
         return res.send({
           type: InteractionResponseType.MODAL,
           data: {
@@ -111,7 +111,7 @@ app.post(
         const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
 
         try {
-          // Send results
+          // Tell discord we'll update the message later
           await res.send({
             type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
           })
@@ -136,7 +136,7 @@ app.post(
                 minute: '2-digit',
               })}`,
               '',
-              'Jizzcuzi',
+              '',
             ],
           ]
           const body = {
@@ -155,7 +155,7 @@ app.post(
             console.error('Error appending to sheet:', err)
           }
 
-          // Update message
+          // Update message once the spreadsheet has updated
           await DiscordRequest(endpoint, {
             method: 'PATCH',
             body: {
@@ -177,7 +177,6 @@ app.post(
     if (type === InteractionType.MODAL_SUBMIT) {
       const userID = data.components[0].component.values[0]
       try {
-        // Send results
         const sheets = google.sheets('v4')
         const spreadsheetId = process.env.SPREADSHEET_ID
         const auth = new google.auth.GoogleAuth({
@@ -185,6 +184,7 @@ app.post(
           scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         })
 
+        // Get user info for who is on the way
         const getUser = async () => {
           const user = await DiscordRequest(`users/${userID}`, {
             method: 'GET',
@@ -192,7 +192,7 @@ app.post(
           return user.json()
         }
         const user = await getUser()
-
+        // Assemble row to append to spreadsheet
         const row = [
           [
             `${new Date().toDateString()}`,
@@ -213,7 +213,9 @@ app.post(
         const body = {
           values: row,
         }
+
         let sheetsRes
+        // Append row to sheet
         try {
           const res = await sheets.spreadsheets.values.append({
             auth,
@@ -226,7 +228,7 @@ app.post(
         } catch (err) {
           console.error('Error appending to sheet:', err)
         }
-
+        // Send confirmation message with "arrived" button
         await res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
@@ -234,7 +236,8 @@ app.post(
             components: [
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
-                content: 'Infraction logged.',
+                content:
+                  'Infraction logged. Press the button below when they finally show up.',
               },
               {
                 type: MessageComponentTypes.ACTION_ROW,
