@@ -30,7 +30,7 @@ app.post(
     // Interaction id, type and data
     const { id, type, data } = req.body
 
-    console.log(req.body)
+    console.log(type)
 
     /**
      * Handle verification requests
@@ -65,7 +65,7 @@ app.post(
       }
 
       if (name === 'dislock') {
-        // Send a message into the channel where command was triggered from
+        // Send a message into the channel where command was triggered from)
         return res.send({
           type: InteractionResponseType.MODAL,
           data: {
@@ -314,6 +314,80 @@ app.post(
           console.error('Error sending message:', err)
         }
       }
+      return
+    }
+
+    if (type === InteractionType.MODAL_SUBMIT) {
+      console.log(data.components)
+
+      // const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+      const userID = data.components[0].component.values[0]
+      try {
+        // Send results
+        const sheets = google.sheets('v4')
+        const spreadsheetId = process.env.SPREADSHEET_ID
+        const auth = new google.auth.GoogleAuth({
+          keyFile: 'secret-key.json',
+          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        })
+
+        const getUser = async () => {
+          const user = await DiscordRequest(`users/${userID}`, {
+            method: 'GET',
+          })
+          return user.json()
+        }
+        const user = await getUser()
+
+        const row = [
+          [
+            `${new Date().toDateString()}`,
+            `${user.global_name || user.username}`,
+            `${new Date().toLocaleTimeString('en-NZ', {
+              timeZone: 'Pacific/Auckland',
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+            })}`,
+            `${data.components[1].value}`,
+            '13:20',
+            '2 mins',
+            'Spamming emojis',
+          ],
+        ]
+
+        const body = {
+          values: row,
+        }
+
+        try {
+          await sheets.spreadsheets.values.append({
+            auth,
+            spreadsheetId,
+            range: 'Tardiness',
+            requestBody: body,
+            valueInputOption: 'USER_ENTERED',
+          })
+        } catch (err) {
+          console.error('Error appending to sheet:', err)
+        }
+
+        await res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+            components: [
+              {
+                type: MessageComponentTypes.TEXT_DISPLAY,
+                content: 'Infraction logged.',
+              },
+            ],
+          },
+        })
+      } catch (err) {
+        console.error('Error sending message:', err)
+      }
+
       return
     }
 
