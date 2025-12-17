@@ -141,7 +141,7 @@ app.post(
                 minute: '2-digit',
               })}`,
               '',
-              '',
+              null,
             ],
           ]
           const body = {
@@ -167,7 +167,7 @@ app.post(
               components: [
                 {
                   type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: 'Logged Arrival Time',
+                  content: 'The patron thanks you for your service.',
                 },
               ],
             },
@@ -241,8 +241,7 @@ app.post(
             components: [
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
-                content:
-                  'Infraction logged. Press the button below when they finally show up.',
+                content: "What's the plan?",
               },
               {
                 type: MessageComponentTypes.ACTION_ROW,
@@ -251,7 +250,7 @@ app.post(
                     type: MessageComponentTypes.BUTTON,
                     style: ButtonStyleTypes.PRIMARY,
                     custom_id: `arrived_button_${sheetsRes}`,
-                    label: 'Arrived',
+                    label: 'Good Job',
                   },
                 ],
               },

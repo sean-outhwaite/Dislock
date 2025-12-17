@@ -12,7 +12,7 @@ const TEST_COMMAND = {
 
 const DISLOCK_COMMAND = {
   name: 'dislock',
-  description: 'Basic command',
+  description: 'Log someone AFK in lane',
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
