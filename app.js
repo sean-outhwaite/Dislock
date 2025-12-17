@@ -152,6 +152,33 @@ app.post(
       // custom_id set in payload when sending message component
       const componentId = data.custom_id
 
+      console.log(req)
+
+      if (componentId.startsWith('arrived_button')) {
+        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+
+        try {
+          // Send results
+          await res.send({
+            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+          })
+          // Update ephemeral message
+          await DiscordRequest(endpoint, {
+            method: 'PATCH',
+            body: {
+              components: [
+                {
+                  type: MessageComponentTypes.TEXT_DISPLAY,
+                  content: 'Logged Arrival Time',
+                },
+              ],
+            },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+      }
+
       if (componentId.startsWith('accept_button_')) {
         // get the associated game ID
         const gameId = componentId.replace('accept_button_', '')
