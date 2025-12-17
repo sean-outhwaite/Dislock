@@ -349,7 +349,7 @@ app.post(
               hour: '2-digit',
               minute: '2-digit',
             })}`,
-            `${data.components[1].value}`,
+            `${data.components[1].component.value}`,
             '13:20',
             '2 mins',
             'Spamming emojis',
@@ -359,15 +359,15 @@ app.post(
         const body = {
           values: row,
         }
-
         try {
-          await sheets.spreadsheets.values.append({
+          const res = await sheets.spreadsheets.values.append({
             auth,
             spreadsheetId,
             range: 'Tardiness',
             requestBody: body,
             valueInputOption: 'USER_ENTERED',
           })
+          // console.log(res)
         } catch (err) {
           console.error('Error appending to sheet:', err)
         }
@@ -380,6 +380,17 @@ app.post(
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
                 content: 'Infraction logged.',
+              },
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: [
+                  {
+                    type: MessageComponentTypes.BUTTON,
+                    style: ButtonStyleTypes.PRIMARY,
+                    custom_id: 'arrived_button',
+                    label: 'Arrived',
+                  },
+                ],
               },
             ],
           },
