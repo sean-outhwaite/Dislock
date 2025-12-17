@@ -9,7 +9,6 @@ import {
   verifyKeyMiddleware,
 } from 'discord-interactions'
 import { getRandomEmoji, DiscordRequest } from './utils.js'
-import { getShuffledOptions, getResult } from './game.js'
 import { google } from 'googleapis'
 
 // Create an express app
@@ -29,8 +28,6 @@ app.post(
   async function (req, res) {
     // Interaction id, type and data
     const { id, type, data } = req.body
-
-    console.log(type)
 
     /**
      * Handle verification requests
@@ -101,49 +98,6 @@ app.post(
         })
       }
 
-      // "challenge" command
-      if (name === 'challenge' && id) {
-        // Interaction context
-        const context = req.body.context
-        // User ID is in user field for (G)DMs, and member for servers
-        const userId =
-          context === 0 ? req.body.member.user.id : req.body.user.id
-        // User's object choice
-        const objectName = req.body.data.options[0].value
-
-        // Create active game using message ID as the game ID
-        activeGames[id] = {
-          id: userId,
-          objectName,
-        }
-
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-            components: [
-              {
-                type: MessageComponentTypes.TEXT_DISPLAY,
-                // Fetches a random emoji to send from a helper function
-                content: `Rock papers scissors challenge from <@${userId}>`,
-              },
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: [
-                  {
-                    type: MessageComponentTypes.BUTTON,
-                    // Append the game ID to use later on
-                    custom_id: `accept_button_${req.body.id}`,
-                    label: 'Accept',
-                    style: ButtonStyleTypes.PRIMARY,
-                  },
-                ],
-              },
-            ],
-          },
-        })
-      }
-
       console.error(`unknown command: ${name}`)
       return res.status(400).json({ error: 'unknown command' })
     }
@@ -151,8 +105,6 @@ app.post(
     if (type === InteractionType.MESSAGE_COMPONENT) {
       // custom_id set in payload when sending message component
       const componentId = data.custom_id
-
-      // console.log(req)
 
       if (componentId.startsWith('arrived_button')) {
         const sheetRange = componentId.replace('arrived_button_', '')
@@ -203,7 +155,7 @@ app.post(
             console.error('Error appending to sheet:', err)
           }
 
-          // Update ephemeral message
+          // Update message
           await DiscordRequest(endpoint, {
             method: 'PATCH',
             body: {
@@ -219,105 +171,10 @@ app.post(
           console.error('Error sending message:', err)
         }
       }
-
-      if (componentId.startsWith('accept_button_')) {
-        // get the associated game ID
-        const gameId = componentId.replace('accept_button_', '')
-        // Delete message with token in request body
-        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
-        try {
-          await res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              // Indicates it'll be an ephemeral message
-              flags:
-                InteractionResponseFlags.EPHEMERAL |
-                InteractionResponseFlags.IS_COMPONENTS_V2,
-              components: [
-                {
-                  type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: 'What is your object of choice?',
-                },
-                {
-                  type: MessageComponentTypes.ACTION_ROW,
-                  components: [
-                    {
-                      type: MessageComponentTypes.STRING_SELECT,
-                      // Append game ID
-                      custom_id: `select_choice_${gameId}`,
-                      options: getShuffledOptions(),
-                    },
-                  ],
-                },
-              ],
-            },
-          })
-          // Delete previous message
-          await DiscordRequest(endpoint, { method: 'DELETE' })
-        } catch (err) {
-          console.error('Error sending message:', err)
-        }
-      } else if (componentId.startsWith('select_choice_')) {
-        // get the associated game ID
-        const gameId = componentId.replace('select_choice_', '')
-
-        if (activeGames[gameId]) {
-          // Interaction context
-          const context = req.body.context
-          // Get user ID and object choice for responding user
-          // User ID is in user field for (G)DMs, and member for servers
-          const userId =
-            context === 0 ? req.body.member.user.id : req.body.user.id
-          const objectName = data.values[0]
-          // Calculate result from helper function
-          const resultStr = getResult(activeGames[gameId], {
-            id: userId,
-            objectName,
-          })
-
-          // Remove game from storage
-          delete activeGames[gameId]
-          // Update message with token in request body
-          const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
-
-          try {
-            // Send results
-            await res.send({
-              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-              data: {
-                flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-                components: [
-                  {
-                    type: MessageComponentTypes.TEXT_DISPLAY,
-                    content: resultStr,
-                  },
-                ],
-              },
-            })
-            // Update ephemeral message
-            await DiscordRequest(endpoint, {
-              method: 'PATCH',
-              body: {
-                components: [
-                  {
-                    type: MessageComponentTypes.TEXT_DISPLAY,
-                    content: 'Nice choice ' + getRandomEmoji(),
-                  },
-                ],
-              },
-            })
-          } catch (err) {
-            console.error('Error sending message:', err)
-          }
-        }
-      }
       return
     }
 
     if (type === InteractionType.MODAL_SUBMIT) {
-      // console.log(data.components)
-
-      // const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
       const userID = data.components[0].component.values[0]
       try {
         // Send results
