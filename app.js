@@ -206,7 +206,7 @@ app.post(
             `${data.components[1].component.value}`,
             '',
             '',
-            'Jizzcuzi',
+            'Has to play Ivy',
           ],
         ]
 
