@@ -152,9 +152,10 @@ app.post(
       // custom_id set in payload when sending message component
       const componentId = data.custom_id
 
-      console.log(req)
+      // console.log(req)
 
       if (componentId.startsWith('arrived_button')) {
+        const sheetRange = componentId.replace('arrived_button_', '')
         const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
 
         try {
@@ -162,6 +163,46 @@ app.post(
           await res.send({
             type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
           })
+          // Update sheets
+          const sheets = google.sheets('v4')
+          const spreadsheetId = process.env.SPREADSHEET_ID
+          const auth = new google.auth.GoogleAuth({
+            keyFile: 'secret-key.json',
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+          })
+
+          const row = [
+            [
+              null,
+              null,
+              null,
+              null,
+              `${new Date().toLocaleTimeString('en-NZ', {
+                timeZone: 'Pacific/Auckland',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+              })}`,
+              '',
+              'Jizzcuzi',
+            ],
+          ]
+          const body = {
+            values: row,
+          }
+
+          try {
+            await sheets.spreadsheets.values.update({
+              auth,
+              spreadsheetId,
+              range: sheetRange,
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+
           // Update ephemeral message
           await DiscordRequest(endpoint, {
             method: 'PATCH',
@@ -269,83 +310,12 @@ app.post(
             console.error('Error sending message:', err)
           }
         }
-      } else if (componentId === 'user_select') {
-        // const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
-
-        try {
-          // Send results
-          const sheets = google.sheets('v4')
-          const spreadsheetId = process.env.SPREADSHEET_ID
-          const auth = new google.auth.GoogleAuth({
-            keyFile: 'secret-key.json',
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-          })
-
-          const getUser = async () => {
-            const user = await DiscordRequest(
-              `users/${req.body.member.user.id}`,
-              {
-                method: 'GET',
-              }
-            )
-            return user.json()
-          }
-          const user = await getUser()
-
-          const row = [
-            [
-              `${new Date().toDateString()}`,
-              `${user.global_name || user.username}`,
-              `${new Date().toLocaleTimeString('en-NZ', {
-                timeZone: 'Pacific/Auckland',
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-              })}`,
-              '13:18',
-              '13:20',
-              '2 mins',
-              'Spamming emojis',
-            ],
-          ]
-
-          const body = {
-            values: row,
-          }
-
-          try {
-            await sheets.spreadsheets.values.append({
-              auth,
-              spreadsheetId,
-              range: 'Tardiness',
-              requestBody: body,
-              valueInputOption: 'USER_ENTERED',
-            })
-          } catch (err) {
-            console.error('Error appending to sheet:', err)
-          }
-
-          await res.send({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-              components: [
-                {
-                  type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: 'Infraction logged.',
-                },
-              ],
-            },
-          })
-        } catch (err) {
-          console.error('Error sending message:', err)
-        }
       }
       return
     }
 
     if (type === InteractionType.MODAL_SUBMIT) {
-      console.log(data.components)
+      // console.log(data.components)
 
       // const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
       const userID = data.components[0].component.values[0]
@@ -377,15 +347,16 @@ app.post(
               minute: '2-digit',
             })}`,
             `${data.components[1].component.value}`,
-            '13:20',
-            '2 mins',
-            'Spamming emojis',
+            '',
+            '',
+            'Jizzcuzi',
           ],
         ]
 
         const body = {
           values: row,
         }
+        let sheetsRes
         try {
           const res = await sheets.spreadsheets.values.append({
             auth,
@@ -394,7 +365,7 @@ app.post(
             requestBody: body,
             valueInputOption: 'USER_ENTERED',
           })
-          // console.log(res)
+          sheetsRes = res.data.updates.updatedRange
         } catch (err) {
           console.error('Error appending to sheet:', err)
         }
@@ -414,7 +385,7 @@ app.post(
                   {
                     type: MessageComponentTypes.BUTTON,
                     style: ButtonStyleTypes.PRIMARY,
-                    custom_id: 'arrived_button',
+                    custom_id: `arrived_button_${sheetsRes}`,
                     label: 'Arrived',
                   },
                 ],
