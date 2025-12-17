@@ -9,5 +9,5 @@ Tech used
 - Node.js (JavaScript)
 - Express (server, `/interactions`)
 - discord-interactions (request verification + types)
-- googleapis (Sheets API via a service account `secret-key.json`)
+- googleapis (Sheets API via a service account)
 - dotenv for environment variables
