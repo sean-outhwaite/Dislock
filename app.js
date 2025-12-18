@@ -172,6 +172,9 @@ app.post(
               minute: '2-digit',
             })}`,
             `${data.components[1].component.value}`,
+            '',
+            '',
+            '',
           ],
         ]
 
