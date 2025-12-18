@@ -376,6 +376,7 @@ app.post(
             hour: '2-digit',
             minute: '2-digit',
           })
+          console.log(arrivalTime)
           const claimedTime = new Date(`1970-01-01T${arrivalTime}:00`)
           const currentTime = new Date(`1970-01-01T${now}:00`)
           const diffMs = currentTime - claimedTime
