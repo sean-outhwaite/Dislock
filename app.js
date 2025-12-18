@@ -66,6 +66,46 @@ app.post(
         })
       }
 
+      if (name === 'hitlist') {
+        // Trigger a modal to collect info
+        return res.send({
+          type: InteractionResponseType.MODAL,
+          data: {
+            custom_id: 'hitlist_modal',
+            title: 'Hitlist Submission',
+            components: [
+              {
+                type: 18, // ComponentType.LABEL
+                label: 'Who hurt you?',
+                description: 'Enter their steam name',
+                component: {
+                  type: 4, // ComponentType.TEXT_INPUT
+                  custom_id: 'steam_name',
+                  style: 1,
+                  min_length: 1,
+                  max_length: 50,
+                  placeholder: `John Deadlock`,
+                  required: true,
+                },
+              },
+              {
+                type: 18, // ComponentType.LABEL
+                label: 'What did they do to you?',
+                component: {
+                  type: 4, // ComponentType.TEXT_INPUT
+                  custom_id: 'sin',
+                  style: 2,
+                  min_length: 0,
+                  max_length: 1000,
+                  placeholder: `Stole my Sinners, didn't shoot creeps, etc.`,
+                  required: true,
+                },
+              },
+            ],
+          },
+        })
+      }
+
       if (name === 'dislock') {
         // Trigger a modal to collect info
         return res.send({
@@ -167,7 +207,7 @@ app.post(
               components: [
                 {
                   type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: 'The patron thanks you for your service.',
+                  content: `The patron thanks you for your service.`,
                 },
               ],
             },
@@ -241,7 +281,7 @@ app.post(
             components: [
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
-                content: "What's the plan?",
+                content: `What's the plan @${user.id}?`,
               },
               {
                 type: MessageComponentTypes.ACTION_ROW,

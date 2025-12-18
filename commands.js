@@ -18,6 +18,14 @@ const DISLOCK_COMMAND = {
   contexts: [0, 1, 2],
 }
 
-const ALL_COMMANDS = [DISLOCK_COMMAND]
+const HITLIST_COMMAND = {
+  name: 'hitlist',
+  description: 'Log a sweat that was mean to you',
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+}
+
+const ALL_COMMANDS = [DISLOCK_COMMAND, HITLIST_COMMAND]
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS)
