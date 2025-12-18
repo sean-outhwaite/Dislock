@@ -1,4 +1,4 @@
-# Dislock
+# 👁️ Dislock
 
 Discord interactions bot that collects "infraction" / tardiness data via a modal and buttons, and writes/updates rows in a Google Sheet.
 
