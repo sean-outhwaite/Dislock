@@ -285,7 +285,7 @@ app.post(
             components: [
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
-                content: `What's the plan?`,
+                content: `What's the plan <@${userID}>?`,
               },
               {
                 type: MessageComponentTypes.ACTION_ROW,
