@@ -169,7 +169,9 @@ app.post(
           })
           console.log(data)
 
-          const row = [[null, null, null, null, null, `${data.values[0]}`]]
+          const row = [
+            [null, null, null, null, null, null, `${data.values[0]}`],
+          ]
           const body = {
             values: row,
           }
@@ -296,7 +298,7 @@ app.post(
             `${data.components[1].component.value}`,
             '',
             '',
-            'Has to play Ivy',
+            '',
           ],
         ]
 
