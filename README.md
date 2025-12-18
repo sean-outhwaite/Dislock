@@ -1,6 +1,8 @@
 # 👁️ Dislock
 
-Discord interactions bot that collects "infraction" / tardiness data via a modal and buttons, and writes/updates rows in a Google Sheet.
+Discord interactions bot that collects "infraction" / tardiness data via a modal, and writes/updates rows in a Google Sheet.
+
+It will also send a message in the channel, with a button that can be pressed to log actual arrival time. Calculates the delta betweeen the claimed and actual arrival times, updates the record in the sheet, and edits the message in discord to note that it's been recorded.
 
 Useful for gathering evidence and being smug when your friends say they're 5 minutes away from starting a game of Deadlock but for some reason take longer than 5 minutes.
 
