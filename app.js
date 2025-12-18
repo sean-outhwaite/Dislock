@@ -195,7 +195,7 @@ app.post(
       }
 
       if (componentId.startsWith('arrived_button')) {
-        const sheetRange = componentId.replace('arrived_button_', '')
+        const sheetRange = componentId.replace('punishments_', '')
         const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
 
         try {
