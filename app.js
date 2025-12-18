@@ -15,24 +15,21 @@ import { google } from 'googleapis'
 const app = express()
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000
-// To keep track of our active games
-const activeGames = {}
 
-/**
- * Interactions endpoint URL where Discord will send HTTP requests
- * Parse request body and verifies incoming requests using discord-interactions package
- */
-
-app.get('/interactions', (req, res) => {
-  res.send('Hello World!')
+// Google sheets config
+const sheets = google.sheets('v4')
+const spreadsheetId = process.env.SPREADSHEET_ID
+const auth = new google.auth.GoogleAuth({
+  keyFile: 'secret-key.json',
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 })
 
 app.post(
   '/interactions',
   verifyKeyMiddleware(process.env.PUBLIC_KEY),
   async function (req, res) {
-    // Interaction id, type and data
-    const { id, type, data } = req.body
+    // Interaction type and data
+    const { type, data } = req.body
 
     /**
      * Handle verification requests
@@ -43,7 +40,6 @@ app.post(
 
     /**
      * Handle slash command requests
-     * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
      */
     if (type === InteractionType.APPLICATION_COMMAND) {
       const { name } = data
@@ -66,6 +62,7 @@ app.post(
         })
       }
 
+      // Handle hitlist command
       if (name === 'hitlist') {
         // Trigger a modal to collect info
         return res.send({
@@ -79,7 +76,7 @@ app.post(
                 label: 'Who hurt you?',
                 description: 'Enter their steam name',
                 component: {
-                  type: 4, // ComponentType.TEXT_INPUT
+                  type: MessageComponentTypes.INPUT_TEXT,
                   custom_id: 'steam_name',
                   style: 1,
                   min_length: 1,
@@ -92,7 +89,7 @@ app.post(
                 type: 18, // ComponentType.LABEL
                 label: 'What did they do to you?',
                 component: {
-                  type: 4, // ComponentType.TEXT_INPUT
+                  type: MessageComponentTypes.INPUT_TEXT,
                   custom_id: 'sin',
                   style: 2,
                   min_length: 0,
@@ -106,6 +103,7 @@ app.post(
         })
       }
 
+      // Handle dislock command
       if (name === 'dislock') {
         // Trigger a modal to collect info
         return res.send({
@@ -119,7 +117,7 @@ app.post(
                 label: 'Whomst',
                 description: 'Select the naughty boy',
                 component: {
-                  type: 5, // ComponentType.USER_SELECT
+                  type: MessageComponentTypes.USER_SELECT,
                   custom_id: 'user_select',
                   placeholder: 'Select a user',
                 },
@@ -129,7 +127,7 @@ app.post(
                 label: 'Claimed Arrival Time',
                 description: '24H format plz',
                 component: {
-                  type: 4, // ComponentType.TEXT_INPUT
+                  type: MessageComponentTypes.INPUT_TEXT,
                   custom_id: 'arrival_time',
                   style: 2,
                   min_length: 5,
@@ -147,134 +145,13 @@ app.post(
       return res.status(400).json({ error: 'unknown command' })
     }
 
-    if (type === InteractionType.MESSAGE_COMPONENT) {
-      // custom_id set in payload when sending message component
-      const componentId = data.custom_id
-
-      if (componentId.startsWith('punishments')) {
-        const sheetRange = componentId.replace('punishments_', '')
-
-        try {
-          // Tell discord we'll update the message later
-          await res.send({
-            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
-          })
-          // Update sheets
-          const sheets = google.sheets('v4')
-          const spreadsheetId = process.env.SPREADSHEET_ID
-          const auth = new google.auth.GoogleAuth({
-            keyFile: 'secret-key.json',
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-          })
-          console.log(data)
-
-          const row = [
-            [null, null, null, null, null, null, `${data.values[0]}`],
-          ]
-          const body = {
-            values: row,
-          }
-
-          try {
-            await sheets.spreadsheets.values.update({
-              auth,
-              spreadsheetId,
-              range: sheetRange,
-              requestBody: body,
-              valueInputOption: 'USER_ENTERED',
-            })
-          } catch (err) {
-            console.error('Error appending to sheet:', err)
-          }
-
-          // Update message once the spreadsheet has updated
-        } catch (err) {
-          console.error('Error sending message:', err)
-        }
-      }
-
-      if (componentId.startsWith('arrived_button')) {
-        const sheetRange = componentId.replace('arrived_button_', '')
-        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
-
-        try {
-          // Tell discord we'll update the message later
-          await res.send({
-            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
-          })
-          // Update sheets
-          const sheets = google.sheets('v4')
-          const spreadsheetId = process.env.SPREADSHEET_ID
-          const auth = new google.auth.GoogleAuth({
-            keyFile: 'secret-key.json',
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-          })
-          console.log(data)
-
-          const row = [
-            [
-              null,
-              null,
-              null,
-              null,
-              `${new Date().toLocaleTimeString('en-NZ', {
-                timeZone: 'Pacific/Auckland',
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-              })}`,
-              '',
-              ,
-            ],
-          ]
-          const body = {
-            values: row,
-          }
-
-          try {
-            await sheets.spreadsheets.values.update({
-              auth,
-              spreadsheetId,
-              range: sheetRange,
-              requestBody: body,
-              valueInputOption: 'USER_ENTERED',
-            })
-          } catch (err) {
-            console.error('Error appending to sheet:', err)
-          }
-
-          // Update message once the spreadsheet has updated
-          await DiscordRequest(endpoint, {
-            method: 'PATCH',
-            body: {
-              components: [
-                {
-                  type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: `The patron thanks you for your service.`,
-                },
-              ],
-            },
-          })
-        } catch (err) {
-          console.error('Error sending message:', err)
-        }
-      }
-      return
-    }
-
+    // Handle dislock modal submission
     if (
       type === InteractionType.MODAL_SUBMIT &&
       data.custom_id === 'dislock_modal'
     ) {
       const userID = data.components[0].component.values[0]
       try {
-        const sheets = google.sheets('v4')
-        const spreadsheetId = process.env.SPREADSHEET_ID
-        const auth = new google.auth.GoogleAuth({
-          keyFile: 'secret-key.json',
-          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        })
-
         // Get user info for who is on the way
         const getUser = async () => {
           const user = await DiscordRequest(`users/${userID}`, {
@@ -295,9 +172,6 @@ app.post(
               minute: '2-digit',
             })}`,
             `${data.components[1].component.value}`,
-            '',
-            '',
-            '',
           ],
         ]
 
@@ -378,18 +252,12 @@ app.post(
       return
     }
 
+    // Handle hitlist modal submission
     if (
       type === InteractionType.MODAL_SUBMIT &&
       data.custom_id === 'hitlist_modal'
     ) {
       try {
-        const sheets = google.sheets('v4')
-        const spreadsheetId = process.env.SPREADSHEET_ID
-        const auth = new google.auth.GoogleAuth({
-          keyFile: 'secret-key.json',
-          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        })
-
         // Assemble row to append to spreadsheet
         const row = [
           [
@@ -416,7 +284,7 @@ app.post(
         } catch (err) {
           console.error('Error appending to sheet:', err)
         }
-        // Send confirmation message with "arrived" button
+        // Send confirmation message
         await res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
@@ -433,6 +301,103 @@ app.post(
         console.error('Error sending message:', err)
       }
 
+      return
+    }
+
+    if (type === InteractionType.MESSAGE_COMPONENT) {
+      // custom_id set in payload when sending message component
+      const componentId = data.custom_id
+
+      if (componentId.startsWith('punishments')) {
+        const sheetRange = componentId.replace('punishments_', '')
+
+        try {
+          // Tell discord we'll update the message later
+          await res.send({
+            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+          })
+          // Update sheets
+          const row = [
+            [null, null, null, null, null, null, `${data.values[0]}`],
+          ]
+          const body = {
+            values: row,
+          }
+
+          try {
+            await sheets.spreadsheets.values.update({
+              auth,
+              spreadsheetId,
+              range: sheetRange,
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+      }
+
+      if (componentId.startsWith('arrived_button')) {
+        const sheetRange = componentId.replace('arrived_button_', '')
+        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+
+        try {
+          // Tell discord we'll update the message later
+          await res.send({
+            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+          })
+          // Update sheets
+          const row = [
+            [
+              null,
+              null,
+              null,
+              null,
+              `${new Date().toLocaleTimeString('en-NZ', {
+                timeZone: 'Pacific/Auckland',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+              })}`,
+              ,
+            ],
+          ]
+          const body = {
+            values: row,
+          }
+
+          // Update arrival time in sheet
+          try {
+            await sheets.spreadsheets.values.update({
+              auth,
+              spreadsheetId,
+              range: sheetRange,
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+
+          // Update message once the spreadsheet has updated
+          await DiscordRequest(endpoint, {
+            method: 'PATCH',
+            body: {
+              components: [
+                {
+                  type: MessageComponentTypes.TEXT_DISPLAY,
+                  content: `The patron thanks you for your service.`,
+                },
+              ],
+            },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+      }
       return
     }
 
