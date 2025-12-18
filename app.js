@@ -356,14 +356,13 @@ app.post(
           // Get the claimed arrival time
           let arrivalTime
           try {
-            const regex = /A(.*?)G/gm
-            const cell = sheetRange.match(regex)[0]
+            const regex = /A(.*?):/
+            const cell = sheetRange.match(regex)[1]
             const response = await sheets.spreadsheets.values.get({
               auth,
               spreadsheetId,
               range: `Tardiness!D${cell}`,
             })
-            console.log('Response: ' + response)
             arrivalTime = response.data.values[0][0]
           } catch (err) {
             console.error('Error reading sheet:', err)
