@@ -369,26 +369,20 @@ app.post(
           }
 
           // Calculate difference between actual and claimed arrival time
+          const now = new Date().toLocaleTimeString('en-NZ', {
+            timeZone: 'Pacific/Auckland',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+          })
           const claimedTime = new Date(`1970-01-01T${arrivalTime}:00`)
-          const currentTime = new Date()
+          const currentTime = new Date(`1970-01-01T${now}:00`)
           const diffMs = currentTime - claimedTime
-          const diffMins = Math.round(diffMs / 60000)
+          const diffMins = Math.round(Number(diffMs) / 60000)
 
           // Update sheets
           const row = [
-            [
-              null,
-              null,
-              null,
-              null,
-              `${new Date().toLocaleTimeString('en-NZ', {
-                timeZone: 'Pacific/Auckland',
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-              })}`,
-              `${diffMins} minutes`,
-            ],
+            [null, null, null, null, `${now}`, `${diffMins} minutes`],
           ]
           const body = {
             values: row,
