@@ -363,7 +363,7 @@ app.post(
               spreadsheetId,
               range: `Tardiness!D${cell}`,
             })
-            console.log(response.data)
+            console.log('Response: ' + response)
             arrivalTime = response.data.values[0][0]
           } catch (err) {
             console.error('Error reading sheet:', err)
