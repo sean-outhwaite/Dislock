@@ -333,7 +333,7 @@ app.post(
                 components: [
                   {
                     type: MessageComponentTypes.STRING_SELECT,
-                    custom_id: 'punishments',
+                    custom_id: `punishments_${sheetsRes}`,
                     placeholder: 'Select Punishment',
                     options: [
                       {
