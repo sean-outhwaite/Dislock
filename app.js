@@ -353,18 +353,7 @@ app.post(
             components: [
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
-                content: `What's the plan @${user.id}?`,
-              },
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: [
-                  {
-                    type: MessageComponentTypes.BUTTON,
-                    style: ButtonStyleTypes.PRIMARY,
-                    custom_id: `arrived_button_${sheetsRes}`,
-                    label: 'Good Job',
-                  },
-                ],
+                content: `${data.components[0].component.value} is a Lash`,
               },
             ],
           },
