@@ -153,7 +153,6 @@ app.post(
 
       if (componentId.startsWith('punishments')) {
         const sheetRange = componentId.replace('punishments_', '')
-        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
 
         try {
           // Tell discord we'll update the message later
