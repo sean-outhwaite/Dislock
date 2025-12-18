@@ -219,7 +219,10 @@ app.post(
       return
     }
 
-    if (type === InteractionType.MODAL_SUBMIT) {
+    if (
+      type === InteractionType.MODAL_SUBMIT &&
+      data.custom_id === 'dislock_modal'
+    ) {
       const userID = data.components[0].component.values[0]
       try {
         const sheets = google.sheets('v4')
@@ -266,6 +269,75 @@ app.post(
             auth,
             spreadsheetId,
             range: 'Tardiness',
+            requestBody: body,
+            valueInputOption: 'USER_ENTERED',
+          })
+          sheetsRes = res.data.updates.updatedRange
+        } catch (err) {
+          console.error('Error appending to sheet:', err)
+        }
+        // Send confirmation message with "arrived" button
+        await res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+            components: [
+              {
+                type: MessageComponentTypes.TEXT_DISPLAY,
+                content: `What's the plan @${user.id}?`,
+              },
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: [
+                  {
+                    type: MessageComponentTypes.BUTTON,
+                    style: ButtonStyleTypes.PRIMARY,
+                    custom_id: `arrived_button_${sheetsRes}`,
+                    label: 'Good Job',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      } catch (err) {
+        console.error('Error sending message:', err)
+      }
+
+      return
+    }
+
+    if (
+      type === InteractionType.MODAL_SUBMIT &&
+      data.custom_id === 'hitlist_modal'
+    ) {
+      try {
+        const sheets = google.sheets('v4')
+        const spreadsheetId = process.env.SPREADSHEET_ID
+        const auth = new google.auth.GoogleAuth({
+          keyFile: 'secret-key.json',
+          scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        })
+
+        // Assemble row to append to spreadsheet
+        const row = [
+          [
+            `${data.components[0].component.value}`,
+            `${data.components[1].component.value}`,
+          ],
+        ]
+
+        const body = {
+          values: row,
+        }
+
+        let sheetsRes
+        // Append row to sheet
+        try {
+          const res = await sheets.spreadsheets.values.append({
+            auth,
+            spreadsheetId,
+            range: 'Hitlist',
             requestBody: body,
             valueInputOption: 'USER_ENTERED',
           })
