@@ -167,6 +167,7 @@ app.post(
             keyFile: 'secret-key.json',
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
           })
+          console.log(data)
 
           const row = [
             [
@@ -181,7 +182,7 @@ app.post(
                 minute: '2-digit',
               })}`,
               '',
-              null,
+              ,
             ],
           ]
           const body = {
@@ -289,6 +290,26 @@ app.post(
               {
                 type: MessageComponentTypes.ACTION_ROW,
                 components: [
+                  {type: MessageComponentTypes.STRING_SELECT,
+                    custom_id: 'punishments',
+                    placeholder: 'Select Punishment',
+                    options: [
+                      {
+                        label: 'Has to play Ivy',
+                        value: 'Has to play Ivy',
+                      },
+                      {
+                        label: 'Community Service',
+                        value: 'Community Service',
+                  },
+                      {
+                        label: '20 Push Ups',
+                        value: '20 Push Ups',
+                  },
+                      {
+                        label: 'Not allowed to buy Counterspell',
+                        value: 'Not allowed to buy Counterspell',
+                  },
                   {
                     type: MessageComponentTypes.BUTTON,
                     style: ButtonStyleTypes.PRIMARY,
