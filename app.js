@@ -363,6 +363,7 @@ app.post(
               spreadsheetId,
               range: `Tardiness!D${cell}`,
             })
+            console.log(response.data)
             arrivalTime = response.data.values[0][0]
           } catch (err) {
             console.error('Error reading sheet:', err)
@@ -378,7 +379,7 @@ app.post(
           const claimedTime = new Date(`1970-01-01T${arrivalTime}:00`)
           const currentTime = new Date(`1970-01-01T${now}:00`)
           const diffMs = currentTime - claimedTime
-          const diffMins = Math.round(Number(diffMs) / 60000)
+          const diffMins = Math.round(diffMs / 60000)
 
           // Update sheets
           const row = [
