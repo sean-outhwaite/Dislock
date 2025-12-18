@@ -151,6 +151,57 @@ app.post(
       // custom_id set in payload when sending message component
       const componentId = data.custom_id
 
+      if (componentId.startsWith('punishments')) {
+        const sheetRange = componentId.replace('arrived_button_', '')
+        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+
+        try {
+          // Tell discord we'll update the message later
+          await res.send({
+            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+          })
+          // Update sheets
+          const sheets = google.sheets('v4')
+          const spreadsheetId = process.env.SPREADSHEET_ID
+          const auth = new google.auth.GoogleAuth({
+            keyFile: 'secret-key.json',
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+          })
+          console.log(data)
+
+          const row = [
+            [
+              null,
+              null,
+              null,
+              null,
+              null,
+              `{data.components[0].component.values[0]}`,
+              ,
+            ],
+          ]
+          const body = {
+            values: row,
+          }
+
+          try {
+            await sheets.spreadsheets.values.update({
+              auth,
+              spreadsheetId,
+              range: sheetRange,
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+
+          // Update message once the spreadsheet has updated
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+      }
+
       if (componentId.startsWith('arrived_button')) {
         const sheetRange = componentId.replace('arrived_button_', '')
         const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
