@@ -352,6 +352,28 @@ app.post(
           await res.send({
             type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
           })
+
+          // Get the claimed arrival time
+          let arrivalTime
+          try {
+            const regex = /A(.*?)G/gm
+            const cell = sheetRange.match(regex)[0]
+            const response = await sheets.spreadsheets.values.get({
+              auth,
+              spreadsheetId,
+              range: `Tardiness!D${cell}`,
+            })
+            arrivalTime = response.data.values[0][0]
+          } catch (err) {
+            console.error('Error reading sheet:', err)
+          }
+
+          // Calculate difference between actual and claimed arrival time
+          const claimedTime = new Date(`1970-01-01T${arrivalTime}:00`)
+          const currentTime = new Date()
+          const diffMs = currentTime - claimedTime
+          const diffMins = Math.round(diffMs / 60000)
+
           // Update sheets
           const row = [
             [
@@ -365,7 +387,7 @@ app.post(
                 hour: '2-digit',
                 minute: '2-digit',
               })}`,
-              ,
+              `${diffMins} minutes`,
             ],
           ]
           const body = {
