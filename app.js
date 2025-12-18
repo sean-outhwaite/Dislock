@@ -290,7 +290,8 @@ app.post(
               {
                 type: MessageComponentTypes.ACTION_ROW,
                 components: [
-                  {type: MessageComponentTypes.STRING_SELECT,
+                  {
+                    type: MessageComponentTypes.STRING_SELECT,
                     custom_id: 'punishments',
                     placeholder: 'Select Punishment',
                     options: [
@@ -301,20 +302,22 @@ app.post(
                       {
                         label: 'Community Service',
                         value: 'Community Service',
-                  },
+                      },
                       {
                         label: '20 Push Ups',
                         value: '20 Push Ups',
-                  },
+                      },
                       {
                         label: 'Not allowed to buy Counterspell',
                         value: 'Not allowed to buy Counterspell',
-                  },
-                  {
-                    type: MessageComponentTypes.BUTTON,
-                    style: ButtonStyleTypes.PRIMARY,
-                    custom_id: `arrived_button_${sheetsRes}`,
-                    label: 'Good Job',
+                      },
+                      {
+                        type: MessageComponentTypes.BUTTON,
+                        style: ButtonStyleTypes.PRIMARY,
+                        custom_id: `arrived_button_${sheetsRes}`,
+                        label: 'Good Job',
+                      },
+                    ],
                   },
                 ],
               },
