@@ -390,14 +390,14 @@ app.post(
           }
 
           // Update message once the spreadsheet has updated
-          console.log(data.user)
+          console.log(data)
           await DiscordRequest(endpoint, {
             method: 'PATCH',
             body: {
               components: [
                 {
                   type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: `The patron thanks you for your service <@${data.user.id}>.`,
+                  content: `The patron thanks you for your service <@${data.user}>.`,
                 },
               ],
             },
