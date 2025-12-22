@@ -8,7 +8,7 @@ import {
   MessageComponentTypes,
   verifyKeyMiddleware,
 } from 'discord-interactions'
-import { getRandomEmoji, DiscordRequest } from './utils.js'
+import { getRandomEmoji, DiscordRequest, getLocalTime } from './utils.js'
 import { google } from 'googleapis'
 
 // Create an express app
@@ -165,12 +165,7 @@ app.post(
           [
             `${new Date().toDateString()}`,
             `${user.global_name || user.username}`,
-            `${new Date().toLocaleTimeString('en-NZ', {
-              timeZone: 'Pacific/Auckland',
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-            })}`,
+            `${getLocalTime()}`,
             `${data.components[1].component.value}`,
             '',
             '',
@@ -369,13 +364,7 @@ app.post(
           }
 
           // Calculate difference between actual and claimed arrival time
-          const now = new Date().toLocaleTimeString('en-NZ', {
-            timeZone: 'Pacific/Auckland',
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-          console.log(arrivalTime)
+          const now = getLocalTime()
           const claimedTime = new Date(`1970-01-01T${arrivalTime}:00`)
           const currentTime = new Date(`1970-01-01T${now}:00`)
           const diffMs = currentTime - claimedTime
