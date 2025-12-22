@@ -396,7 +396,7 @@ app.post(
               components: [
                 {
                   type: MessageComponentTypes.TEXT_DISPLAY,
-                  content: `The patron thanks you for your service.`,
+                  content: `The patron thanks you for your service <@${data.user.id}>.`,
                 },
               ],
             },
