@@ -146,162 +146,160 @@ app.post(
     }
 
     // Handle dislock modal submission
-    if (
-      type === InteractionType.MODAL_SUBMIT &&
-      data.custom_id === 'dislock_modal'
-    ) {
-      const userID = data.components[0].component.values[0]
-      try {
-        // Get user info for who is on the way
-        const getUser = async () => {
-          const user = await DiscordRequest(`users/${userID}`, {
-            method: 'GET',
-          })
-          return user.json()
-        }
-        const user = await getUser()
-        // Assemble row to append to spreadsheet
-        const row = [
-          [
-            `${new Date().toDateString()}`,
-            `${user.global_name || user.username}`,
-            `${getLocalTime()}`,
-            `${data.components[1].component.value}`,
-            '',
-            '',
-            '',
-          ],
-        ]
-
-        const body = {
-          values: row,
-        }
-
-        let sheetsRes
-        // Append row to sheet
+    if (type === InteractionType.MODAL_SUBMIT) {
+      const componentId = data.custom_id
+      if (componentId === 'dislock_modal') {
+        const userID = data.components[0].component.values[0]
         try {
-          const res = await sheets.spreadsheets.values.append({
-            auth,
-            spreadsheetId,
-            range: 'Tardiness',
-            requestBody: body,
-            valueInputOption: 'USER_ENTERED',
-          })
-          sheetsRes = res.data.updates.updatedRange
-        } catch (err) {
-          console.error('Error appending to sheet:', err)
-        }
-        // Send confirmation message with "arrived" button
-        await res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-            components: [
-              {
-                type: MessageComponentTypes.TEXT_DISPLAY,
-                content: `What's the plan <@${userID}>?`,
-              },
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: [
-                  {
-                    type: MessageComponentTypes.STRING_SELECT,
-                    custom_id: `punishments_${sheetsRes}`,
-                    placeholder: 'Select Punishment',
-                    options: [
-                      {
-                        label: 'Has to play Ivy',
-                        value: 'Has to play Ivy',
-                      },
-                      {
-                        label: 'Community Service',
-                        value: 'Community Service',
-                      },
-                      {
-                        label: '20 Push Ups',
-                        value: '20 Push Ups',
-                      },
-                      {
-                        label: 'Not allowed to buy Counterspell',
-                        value: 'Not allowed to buy Counterspell',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                type: MessageComponentTypes.ACTION_ROW,
-                components: [
-                  {
-                    type: MessageComponentTypes.BUTTON,
-                    style: ButtonStyleTypes.PRIMARY,
-                    custom_id: `arrived_button_${sheetsRes}`,
-                    label: 'Good Job',
-                  },
-                ],
-              },
+          // Get user info for who is on the way
+          const getUser = async () => {
+            const user = await DiscordRequest(`users/${userID}`, {
+              method: 'GET',
+            })
+            return user.json()
+          }
+          const user = await getUser()
+          // Assemble row to append to spreadsheet
+          const row = [
+            [
+              `${new Date().toDateString()}`,
+              `${user.global_name || user.username}`,
+              `${getLocalTime()}`,
+              `${data.components[1].component.value}`,
+              '',
+              '',
+              '',
             ],
-          },
-        })
-      } catch (err) {
-        console.error('Error sending message:', err)
+          ]
+
+          const body = {
+            values: row,
+          }
+
+          let sheetsRes
+          // Append row to sheet
+          try {
+            const res = await sheets.spreadsheets.values.append({
+              auth,
+              spreadsheetId,
+              range: 'Tardiness',
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+            sheetsRes = res.data.updates.updatedRange
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+          // Send confirmation message with "arrived" button
+          await res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+              components: [
+                {
+                  type: MessageComponentTypes.TEXT_DISPLAY,
+                  content: `What's the plan <@${userID}>?`,
+                },
+                {
+                  type: MessageComponentTypes.ACTION_ROW,
+                  components: [
+                    {
+                      type: MessageComponentTypes.STRING_SELECT,
+                      custom_id: `punishments_${sheetsRes}`,
+                      placeholder: 'Select Punishment',
+                      options: [
+                        {
+                          label: 'Has to play Ivy',
+                          value: 'Has to play Ivy',
+                        },
+                        {
+                          label: 'Community Service',
+                          value: 'Community Service',
+                        },
+                        {
+                          label: '20 Push Ups',
+                          value: '20 Push Ups',
+                        },
+                        {
+                          label: 'Not allowed to buy Counterspell',
+                          value: 'Not allowed to buy Counterspell',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: MessageComponentTypes.ACTION_ROW,
+                  components: [
+                    {
+                      type: MessageComponentTypes.BUTTON,
+                      style: ButtonStyleTypes.PRIMARY,
+                      custom_id: `arrived_button_${sheetsRes}`,
+                      label: 'Good Job',
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+
+        return
       }
 
-      return
-    }
-
-    // Handle hitlist modal submission
-    if (
-      type === InteractionType.MODAL_SUBMIT &&
-      data.custom_id === 'hitlist_modal'
-    ) {
-      try {
-        // Assemble row to append to spreadsheet
-        const row = [
-          [
-            `${data.components[0].component.value}`,
-            `${data.components[1].component.value}`,
-          ],
-        ]
-
-        const body = {
-          values: row,
-        }
-
-        let sheetsRes
-        // Append row to sheet
+      // Handle hitlist modal submission
+      if (componentId === 'hitlist_modal') {
         try {
-          const res = await sheets.spreadsheets.values.append({
-            auth,
-            spreadsheetId,
-            range: 'Hitlist',
-            requestBody: body,
-            valueInputOption: 'USER_ENTERED',
-          })
-          sheetsRes = res.data.updates.updatedRange
-        } catch (err) {
-          console.error('Error appending to sheet:', err)
-        }
-        // Send confirmation message
-        await res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-            components: [
-              {
-                type: MessageComponentTypes.TEXT_DISPLAY,
-                content: `${data.components[0].component.value} is a Lash`,
-              },
+          // Assemble row to append to spreadsheet
+          const row = [
+            [
+              `${data.components[0].component.value}`,
+              `${data.components[1].component.value}`,
             ],
-          },
-        })
-      } catch (err) {
-        console.error('Error sending message:', err)
-      }
+          ]
 
-      return
+          const body = {
+            values: row,
+          }
+
+          let sheetsRes
+          // Append row to sheet
+          try {
+            const res = await sheets.spreadsheets.values.append({
+              auth,
+              spreadsheetId,
+              range: 'Hitlist',
+              requestBody: body,
+              valueInputOption: 'USER_ENTERED',
+            })
+            sheetsRes = res.data.updates.updatedRange
+          } catch (err) {
+            console.error('Error appending to sheet:', err)
+          }
+          // Send confirmation message
+          await res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+              components: [
+                {
+                  type: MessageComponentTypes.TEXT_DISPLAY,
+                  content: `${data.components[0].component.value} is a Lash`,
+                },
+              ],
+            },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+
+        return
+      }
     }
 
+    // Handle message component interactions
     if (type === InteractionType.MESSAGE_COMPONENT) {
       // custom_id set in payload when sending message component
       const componentId = data.custom_id
