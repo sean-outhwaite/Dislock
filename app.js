@@ -390,7 +390,7 @@ app.post(
           }
 
           // Update message once the spreadsheet has updated
-          console.log(req)
+          console.log(req.body.message)
           await DiscordRequest(endpoint, {
             method: 'PATCH',
             body: {
