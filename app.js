@@ -237,6 +237,12 @@ app.post(
                       custom_id: `arrived_button_${sheetsRes}`,
                       label: 'Good Job',
                     },
+                    {
+                      type: MessageComponentTypes.BUTTON,
+                      style: ButtonStyleTypes.DANGER,
+                      custom_id: `delete_button${sheetsRes}`,
+                      label: 'Delete',
+                    },
                   ],
                 },
               ],
@@ -400,6 +406,43 @@ app.post(
                 },
               ],
             },
+          })
+        } catch (err) {
+          console.error('Error sending message:', err)
+        }
+      }
+
+      if (componentId.startsWith('delete_button')) {
+        const sheetRange = componentId.replace('delete_button_', '')
+        const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`
+
+        try {
+          // Tell discord we'll update the message later
+          await res.send({
+            type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+          })
+
+          const regex = /A(.*?):/
+          const cell = sheetRange.match(regex)[1]
+
+          await sheets.spreadsheets.values.batchUpdate({
+            auth,
+            requests: [
+              {
+                deleteDimension: {
+                  range: {
+                    sheetId: 0,
+                    dimension: 'ROWS',
+                    startIndex: parseInt(cell),
+                    endIndex: parseInt(cell) + 1,
+                  },
+                },
+              },
+            ],
+          })
+
+          await DiscordRequest(endpoint, {
+            method: 'DELETE',
           })
         } catch (err) {
           console.error('Error sending message:', err)
