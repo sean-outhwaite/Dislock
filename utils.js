@@ -37,27 +37,6 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-// Simple method that returns a random emoji from list
-export function getRandomEmoji() {
-  const emojiList = [
-    '😭',
-    '😄',
-    '😌',
-    '🤓',
-    '😎',
-    '😤',
-    '🤖',
-    '😶‍🌫️',
-    '🌏',
-    '📸',
-    '💿',
-    '👋',
-    '🌊',
-    '✨',
-  ]
-  return emojiList[Math.floor(Math.random() * emojiList.length)]
-}
-
 export function getLocalTime() {
   return new Date().toLocaleTimeString('en-NZ', {
     timeZone: 'Pacific/Auckland',

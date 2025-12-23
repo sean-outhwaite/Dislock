@@ -8,7 +8,7 @@ import {
   MessageComponentTypes,
   verifyKeyMiddleware,
 } from 'discord-interactions'
-import { getRandomEmoji, DiscordRequest, getLocalTime } from './utils.js'
+import { DiscordRequest, getLocalTime } from './utils.js'
 import { google } from 'googleapis'
 
 // Create an express app
@@ -55,7 +55,7 @@ app.post(
               {
                 type: MessageComponentTypes.TEXT_DISPLAY,
                 // Fetches a random emoji to send from a helper function
-                content: `hello world ${getRandomEmoji()}`,
+                content: `hello world`,
               },
             ],
           },
