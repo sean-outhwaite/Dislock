@@ -424,7 +424,7 @@ app.post(
 
           const regex = /A(.*?):/
           const cell = sheetRange.match(regex)[1]
-          console.log('Deleting row', cell)
+
           // Delete row from sheet
 
           await sheets.spreadsheets.batchUpdate({
