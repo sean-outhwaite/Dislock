@@ -172,10 +172,6 @@ app.post(
             ],
           ]
 
-          const body = {
-            values: row,
-          }
-
           let sheetsRes
           // Append row to sheet
           try {
@@ -183,7 +179,9 @@ app.post(
               auth,
               spreadsheetId,
               range: 'Tardiness',
-              requestBody: body,
+              requestBody: {
+                values: row,
+              },
               valueInputOption: 'USER_ENTERED',
             })
             sheetsRes = res.data.updates.updatedRange
@@ -266,10 +264,6 @@ app.post(
             ],
           ]
 
-          const body = {
-            values: row,
-          }
-
           let sheetsRes
           // Append row to sheet
           try {
@@ -277,7 +271,9 @@ app.post(
               auth,
               spreadsheetId,
               range: 'Hitlist',
-              requestBody: body,
+              requestBody: {
+                values: row,
+              },
               valueInputOption: 'USER_ENTERED',
             })
             sheetsRes = res.data.updates.updatedRange
@@ -322,16 +318,15 @@ app.post(
           const row = [
             [null, null, null, null, null, null, `${data.values[0]}`],
           ]
-          const body = {
-            values: row,
-          }
 
           try {
             await sheets.spreadsheets.values.update({
               auth,
               spreadsheetId,
               range: sheetRange,
-              requestBody: body,
+              requestBody: {
+                values: row,
+              },
               valueInputOption: 'USER_ENTERED',
             })
           } catch (err) {
@@ -378,9 +373,6 @@ app.post(
           const row = [
             [null, null, null, null, `${now}`, `${diffMins} minutes`],
           ]
-          const body = {
-            values: row,
-          }
 
           // Update arrival time in sheet
           try {
@@ -388,7 +380,9 @@ app.post(
               auth,
               spreadsheetId,
               range: sheetRange,
-              requestBody: body,
+              requestBody: {
+                values: row,
+              },
               valueInputOption: 'USER_ENTERED',
             })
           } catch (err) {
