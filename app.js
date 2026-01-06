@@ -424,22 +424,27 @@ app.post(
 
           const regex = /A(.*?):/
           const cell = sheetRange.match(regex)[1]
+          console.log('Deleting row', cell)
+          // Delete row from sheet
 
-          await sheets.spreadsheets.values.batchUpdate({
+          await sheets.spreadsheets.batchUpdate({
             auth,
             spreadsheetId,
-            requests: [
-              {
-                deleteDimension: {
-                  range: {
-                    sheetId: 0,
-                    dimension: 'ROWS',
-                    startIndex: parseInt(cell),
-                    endIndex: parseInt(cell) + 1,
+            requestBody: {
+              requests: [
+                {
+                  deleteDimension: {
+                    range: {
+                      sheetId: 0,
+                      dimension: 'ROWS',
+                      startIndex: parseInt(cell),
+                      endIndex: parseInt(cell) + 1,
+                    },
                   },
                 },
-              },
-            ],
+              ],
+              includeSpreadsheetInResponse: false,
+            },
           })
 
           await DiscordRequest(endpoint, {
