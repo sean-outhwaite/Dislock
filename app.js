@@ -437,8 +437,8 @@ app.post(
                     range: {
                       sheetId: 0,
                       dimension: 'ROWS',
-                      startIndex: parseInt(cell),
-                      endIndex: parseInt(cell) + 1,
+                      startIndex: parseInt(cell) - 1,
+                      endIndex: parseInt(cell),
                     },
                   },
                 },
