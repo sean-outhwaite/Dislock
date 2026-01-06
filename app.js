@@ -427,6 +427,7 @@ app.post(
 
           await sheets.spreadsheets.values.batchUpdate({
             auth,
+            spreadsheetId,
             requests: [
               {
                 deleteDimension: {
