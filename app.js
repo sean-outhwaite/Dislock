@@ -132,7 +132,7 @@ app.post(
                   style: 2,
                   min_length: 5,
                   max_length: 5,
-                  placeholder: `22:13`,
+                  placeholder: `${getLocalTime()}`,
                   required: true,
                 },
               },
