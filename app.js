@@ -222,6 +222,10 @@ app.post(
                           label: 'Not allowed to buy Counterspell',
                           value: 'Not allowed to buy Counterspell',
                         },
+                        {
+                          label: 'Has to buy Magic Carpet',
+                          value: 'Has to buy Magic Carpet',
+                        },
                       ],
                     },
                   ],
@@ -453,7 +457,7 @@ app.post(
 
     console.error('unknown interaction type', type)
     return res.status(400).json({ error: 'unknown interaction type' })
-  }
+  },
 )
 
 app.listen(PORT, () => {
