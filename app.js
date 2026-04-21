@@ -226,6 +226,10 @@ app.post(
                           label: 'Has to buy Magic Carpet',
                           value: 'Has to buy Magic Carpet',
                         },
+                        {
+                          label: 'No beans for a week',
+                          value: 'No beans for a week',
+                        },
                       ],
                     },
                   ],
