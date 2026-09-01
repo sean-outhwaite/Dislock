@@ -9,6 +9,7 @@ import {
   verifyKeyMiddleware,
 } from 'discord-interactions'
 import { DiscordRequest, getLocalTime } from './utils.js'
+import rankTracker from './rankTracker.js'
 import { google } from 'googleapis'
 
 // Create an express app
@@ -467,3 +468,7 @@ app.post(
 app.listen(PORT, () => {
   console.log('Listening on port', PORT)
 })
+
+//setInterval(() => {
+rankTracker()
+//}, 600000)
