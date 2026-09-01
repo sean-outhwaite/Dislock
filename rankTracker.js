@@ -1,29 +1,6 @@
-import { DiscordRequest } from './utils.js'
+import { DiscordRequest, updateRank } from './utils.js'
+import { sheets, spreadsheetId, auth } from './sheetsClient.js'
 
-let players = [
-  {
-    name: 'Swan',
-    id: 64750041,
-  },
-  {
-    name: 'Voa',
-    id: 87195919,
-  },
-  {
-    name: 'Crisps',
-    id: 31475757,
-  },
-  {
-    name: 'Dee',
-    id: 54578031,
-  },
-  {
-    name: 'Naked',
-    id: 44801486,
-  },
-]
-
-// TODO: Add colours to use as the message colour
 const rankNames = [
   'Obscurus',
   'Initiate',
@@ -39,11 +16,35 @@ const rankNames = [
   'Eternus',
 ]
 
-// TODO: Persist rank data to the google sheet
-
 export default async function rankTracker() {
+  let response
+  try {
+    response = await sheets.spreadsheets.values.batchGet({
+      auth,
+      spreadsheetId,
+      ranges: [`Ranks!A1:D5`],
+    })
+  } catch (error) {
+    console.error('Error fetching player data from Google Sheets:', error)
+    return
+  }
+
+  if (!response.data.valueRanges || response.data.valueRanges.length === 0) {
+    console.error('No data found in the specified range.')
+    return
+  }
+
+  const players = response.data.valueRanges[0].values.map(
+    ([name, id, rank, subrank]) => ({
+      name,
+      id,
+      rank: Number(rank),
+      subrank: Number(subrank),
+    }),
+  )
+
   await Promise.all(
-    players.map(async (player) => {
+    players.map(async (player, index) => {
       try {
         const res = await fetch(
           `https://api.deadlock-api.com/v1/players/${player.id}/rank`,
@@ -54,6 +55,7 @@ export default async function rankTracker() {
         if (player.rank === undefined) {
           player.rank = rank
           player.subrank = subrank
+          await updateRank(index + 1, rank, subrank)
           return
         }
 
@@ -67,6 +69,8 @@ export default async function rankTracker() {
           : `${player.name} has dropped to ${rankNames[rank]} ${subrank} 😔`
         player.rank = rank
         player.subrank = subrank
+
+        await updateRank(index + 1, rank, subrank)
 
         await DiscordRequest(
           `channels/${process.env.DISCORD_CHANNEL_ID}/messages`,
@@ -89,5 +93,4 @@ export default async function rankTracker() {
       }
     }),
   )
-  console.log('Rank Tracker is running...')
 }

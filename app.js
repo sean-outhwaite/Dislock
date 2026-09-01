@@ -10,20 +10,12 @@ import {
 } from 'discord-interactions'
 import { DiscordRequest, getLocalTime } from './utils.js'
 import rankTracker from './rankTracker.js'
-import { google } from 'googleapis'
+import { sheets, spreadsheetId, auth } from './sheetsClient.js'
 
 // Create an express app
 const app = express()
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000
-
-// Google sheets config
-const sheets = google.sheets('v4')
-const spreadsheetId = process.env.SPREADSHEET_ID
-const auth = new google.auth.GoogleAuth({
-  keyFile: 'secret-key.json',
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-})
 
 app.post(
   '/interactions',
@@ -468,7 +460,3 @@ app.post(
 app.listen(PORT, () => {
   console.log('Listening on port', PORT)
 })
-
-//setInterval(() => {
-rankTracker()
-//}, 600000)
