@@ -1,8 +1,6 @@
 name: Rank Tracker
 
 on:
-  schedule:
-    - cron: '2-58/7 * * * *'
   workflow_dispatch:
 
 permissions:
