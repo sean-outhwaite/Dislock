@@ -52,7 +52,7 @@ export default async function rankTracker() {
         if (!res.ok) throw new Error('Failed to fetch player rank')
         const { rank, subrank } = await res.json()
 
-        if (player.rank === undefined) {
+        if (Number.isNaN(player.rank)) {
           player.rank = rank
           player.subrank = subrank
           await updateRank(index + 1, rank, subrank)
