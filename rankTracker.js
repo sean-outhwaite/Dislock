@@ -48,20 +48,19 @@ export default async function rankTracker() {
     return
   }
 
-  if (!response.data.valueRanges || response.data.valueRanges.length === 0) {
+  const values = response.data.valueRanges?.[0]?.values
+  if (!values || values.length === 0) {
     console.error('No data found in the specified range.')
     return
   }
 
-  const players = response.data.valueRanges[0].values.map(
-    ([name, id, rank, subrank, discordID]) => ({
-      name,
-      id,
-      rank: Number(rank),
-      subrank: Number(subrank),
-      discordID,
-    }),
-  )
+  const players = values.map(([name, id, rank, subrank, discordID]) => ({
+    name,
+    id,
+    rank: Number(rank),
+    subrank: Number(subrank),
+    discordID,
+  }))
 
   await Promise.all(
     players.map(async (player, index) => {
@@ -117,7 +116,7 @@ export default async function rankTracker() {
                 {
                   description: statement,
                   color: rankUp
-                    ? parseInt(colours[rank].substring(1), 16)
+                    ? parseInt(colours[rank]?.substring(1) ?? '333333', 16)
                     : 0xff0000,
                   author,
                   thumbnail: {
