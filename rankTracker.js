@@ -81,7 +81,7 @@ export default async function rankTracker() {
                 {
                   title: statement,
                   image: {
-                    url: `https://api.deadlock-api.com/v1/assets/ranks/${rankNames[rank]}/${subrank}/image?format=webp`,
+                    url: `https://api.deadlock-api.com/v1/assets/ranks/${rank}/${subrank}/image?format=webp`,
                   },
                 },
               ],
