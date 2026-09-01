@@ -1,8 +1,9 @@
-import 'dotenv/config'
-import { DiscordRequest, updateRank } from './utils.js'
-import { sheets, auth } from './sheetsClient.js'
-
-const spreadsheetId = process.env.PRIVATE_SPREADSHEET_ID
+import { DiscordRequest, updateRank, getDiscordUser } from './utils.js'
+import {
+  sheets,
+  auth,
+  privateSpreadsheetId as spreadsheetId,
+} from './sheetsClient.js'
 
 const rankNames = [
   'Obscurus',
@@ -76,13 +77,21 @@ export default async function rankTracker() {
 
         await updateRank(index + 1, rank, subrank)
 
-        const getDiscordUser = async () => {
-          const user = await DiscordRequest(`users/${player.discordID}`, {
-            method: 'GET',
-          })
-          return user.json()
+        let author = { name: player.name }
+        try {
+          const user = await getDiscordUser(player.discordID)
+          author = {
+            name: user.global_name || user.username,
+            icon_url: user.avatar
+              ? `https://cdn.discordapp.com/avatars/${player.discordID}/${user.avatar}.png`
+              : undefined,
+          }
+        } catch (error) {
+          console.error(
+            `Error fetching Discord user for ${player.name}:`,
+            error,
+          )
         }
-        const user = await getDiscordUser()
 
         await DiscordRequest(
           `channels/${process.env.DISCORD_CHANNEL_ID}/messages`,
@@ -92,10 +101,7 @@ export default async function rankTracker() {
               embeds: [
                 {
                   description: statement,
-                  author: {
-                    name: user.global_name || user.username,
-                    icon_url: `https://cdn.discordapp.com/avatars/692591564643368971/${user.avatar}.png`,
-                  },
+                  author,
                   thumbnail: {
                     url: `https://api.deadlock-api.com/v1/assets/ranks/${rank}/${subrank}/image?format=webp`,
                   },

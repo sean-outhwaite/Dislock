@@ -25,3 +25,4 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          PRIVATE_SPREADSHEET_ID: ${{ secrets.PRIVATE_SPREADSHEET_ID }}

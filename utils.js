@@ -1,5 +1,9 @@
 import 'dotenv/config'
-import { sheets, auth } from './sheetsClient.js'
+import {
+  sheets,
+  auth,
+  privateSpreadsheetId as spreadsheetId,
+} from './sheetsClient.js'
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
@@ -48,7 +52,6 @@ export function getLocalTime() {
 }
 
 export async function updateRank(row, rank, subrank) {
-  const spreadsheetId = process.env.PRIVATE_SPREADSHEET_ID
   try {
     await sheets.spreadsheets.values.update({
       auth,
@@ -62,4 +65,9 @@ export async function updateRank(row, rank, subrank) {
   } catch (error) {
     console.error('Error updating player rank in Google Sheets:', error)
   }
+}
+
+export async function getDiscordUser(discordID) {
+  const res = await DiscordRequest(`users/${discordID}`, { method: 'GET' })
+  return res.json()
 }
