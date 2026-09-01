@@ -65,8 +65,8 @@ export default async function rankTracker() {
           player.rank < rank ||
           (player.rank === rank && player.subrank < subrank)
         const statement = rankUp
-          ? `${player.name} has moved up to ${rankNames[rank]} ${subrank} 🎉`
-          : `${player.name} has dropped to ${rankNames[rank]} ${subrank} 😔`
+          ? `${player.name} has moved up to **${rankNames[rank]} ${subrank} 🎉**`
+          : `${player.name} has dropped to **${rankNames[rank]} ${subrank} 😔**`
         player.rank = rank
         player.subrank = subrank
 
@@ -80,7 +80,7 @@ export default async function rankTracker() {
               embeds: [
                 {
                   title: statement,
-                  image: {
+                  thumbnail: {
                     url: `https://api.deadlock-api.com/v1/assets/ranks/${rank}/${subrank}/image?format=webp`,
                   },
                 },
