@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { sheets, spreadsheetId, auth } from './sheetsClient.js'
+import { sheets, auth } from './sheetsClient.js'
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
@@ -48,6 +48,7 @@ export function getLocalTime() {
 }
 
 export async function updateRank(row, rank, subrank) {
+  const spreadsheetId = process.env.PRIVATE_SPREADSHEET_ID
   try {
     await sheets.spreadsheets.values.update({
       auth,
