@@ -39,6 +39,8 @@ const rankNames = [
   'Eternus',
 ]
 
+// TODO: Persist rank data to the google sheet
+
 export default async function rankTracker() {
   await Promise.all(
     players.map(async (player) => {
