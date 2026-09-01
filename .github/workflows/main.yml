@@ -1,0 +1,29 @@
+name: Rank Tracker
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Write Google service account key
+        run: echo "$GCP_SA_KEY_BASE64" | base64 -d > secret-key.json
+        env:
+          GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+      - run: node run-poller.js
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
