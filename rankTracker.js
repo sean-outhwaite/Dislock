@@ -20,6 +20,21 @@ const rankNames = [
   'Eternus',
 ]
 
+const colours = [
+  '#333333',
+  '#6d4030',
+  '#504641',
+  '#5C6062',
+  '#9F6836',
+  '#B7C6D8',
+  '#D8B246',
+  '#A8D4D3',
+  '#D4DFE9',
+  '#6776BC',
+  '#E6B460',
+  '#6C98A1',
+]
+
 export default async function rankTracker() {
   let response
   try {
@@ -101,6 +116,9 @@ export default async function rankTracker() {
               embeds: [
                 {
                   description: statement,
+                  color: rankUp
+                    ? parseInt(colours[rank].substring(1), 16)
+                    : 0xff0000,
                   author,
                   thumbnail: {
                     url: `https://api.deadlock-api.com/v1/assets/ranks/${rank}/${subrank}/image?format=webp`,
