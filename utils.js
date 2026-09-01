@@ -52,19 +52,15 @@ export function getLocalTime() {
 }
 
 export async function updateRank(row, rank, subrank) {
-  try {
-    await sheets.spreadsheets.values.update({
-      auth,
-      spreadsheetId,
-      range: `Ranks!C${row}:D${row}`,
-      valueInputOption: 'RAW',
-      requestBody: {
-        values: [[rank, subrank]],
-      },
-    })
-  } catch (error) {
-    console.error('Error updating player rank in Google Sheets:', error)
-  }
+  await sheets.spreadsheets.values.update({
+    auth,
+    spreadsheetId,
+    range: `Ranks!C${row}:D${row}`,
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: [[rank, subrank]],
+    },
+  })
 }
 
 export async function getDiscordUser(discordID) {
