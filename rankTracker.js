@@ -41,7 +41,7 @@ export default async function rankTracker() {
     response = await sheets.spreadsheets.values.batchGet({
       auth,
       spreadsheetId,
-      ranges: [`Ranks!A1:E5`],
+      ranges: [`Ranks!A1:F5`],
     })
   } catch (error) {
     console.error('Error fetching player data from Google Sheets:', error)
@@ -54,16 +54,23 @@ export default async function rankTracker() {
     return
   }
 
-  const players = values.map(([name, id, rank, subrank, discordID]) => ({
-    name,
-    id,
-    rank: Number(rank),
-    subrank: Number(subrank),
-    discordID,
-  }))
+  const players = values.map(
+    ([name, id, rank, subrank, discordID, lastUpdated]) => ({
+      name,
+      id,
+      rank: Number(rank),
+      subrank: Number(subrank),
+      discordID,
+      lastUpdated: lastUpdated ? new Date(lastUpdated) : null,
+    }),
+  )
 
   await Promise.all(
     players.map(async (player, index) => {
+      if (player.lastUpdated && new Date() - player.lastUpdated < 1200000) {
+        return
+      }
+
       try {
         const res = await fetch(
           `https://api.deadlock-api.com/v1/players/${player.id}/rank`,
