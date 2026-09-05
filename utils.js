@@ -51,14 +51,14 @@ export function getLocalTime() {
   })
 }
 
-export async function updateRank(row, rank, subrank) {
+export async function updateRank(row, rank, subrank, lastUpdated) {
   await sheets.spreadsheets.values.update({
     auth,
     spreadsheetId,
-    range: `Ranks!C${row}:D${row}`,
+    range: `Ranks!C${row}:F${row}`,
     valueInputOption: 'RAW',
     requestBody: {
-      values: [[rank, subrank]],
+      values: [[rank, subrank, null, lastUpdated]],
     },
   })
 }

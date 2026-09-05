@@ -96,7 +96,7 @@ export default async function rankTracker() {
         player.rank = rank
         player.subrank = subrank
 
-        await updateRank(index + 1, rank, subrank)
+        await updateRank(index + 1, rank, subrank, new Date())
 
         let author = { name: player.name }
         try {
